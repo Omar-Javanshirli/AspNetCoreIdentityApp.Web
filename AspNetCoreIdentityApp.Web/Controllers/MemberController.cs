@@ -28,9 +28,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            
 
-          
+
+
             var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
             var userViewModel = new UserViewModel
@@ -58,25 +58,22 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         public async Task<IActionResult> PasswordChange(PasswordChangeViewModel request)
         {
             if (!ModelState.IsValid)
-            {
                 return View();
-            }
 
-            var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
-
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
             var checkOldPassword = await _userManager.CheckPasswordAsync(currentUser, request.PasswordOld);
 
             if (!checkOldPassword)
             {
-                ModelState.AddModelError(string.Empty, "Eski şifreniz yanlış");
+                ModelState.AddModelError(string.Empty, "Eski sifreniz yanlis");
                 return View();
             }
 
             var resultChangePassword = await _userManager.ChangePasswordAsync(currentUser, request.PasswordOld, request.PasswordNew);
 
-            if (!resultChangePassword.Succeeded)
+            if (resultChangePassword.Succeeded)
             {
-                ModelState.AddModelErrorList(resultChangePassword.Errors);
+                ModelState.AddModelErrorList(resultChangePassword.Errors.Select(x => x.Description).ToList());
                 return View();
             }
 
@@ -84,9 +81,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             await _signInManager.SignOutAsync();
             await _signInManager.PasswordSignInAsync(currentUser, request.PasswordNew, true, false);
 
-            TempData["SuccessMessage"] = "Şifreniz başarıyla değiştirilmiştir";
-
-            return View();
+            TempData["SuccessMessage"] = "Sifreniz basari ile degistirilmisdir.";
+            
+            return View();  
         }
 
         public async Task<IActionResult> UserEdit()
@@ -182,7 +179,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             return View(userEditViewModel);
         }
-
 
 
         [HttpGet]
