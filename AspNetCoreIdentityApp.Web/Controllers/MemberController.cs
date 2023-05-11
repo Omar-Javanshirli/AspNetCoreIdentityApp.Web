@@ -28,9 +28,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-
-
-
             var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
             var userViewModel = new UserViewModel
@@ -60,7 +57,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
             var checkOldPassword = await _userManager.CheckPasswordAsync(currentUser, request.PasswordOld);
 
             if (!checkOldPassword)
@@ -73,7 +70,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             if (resultChangePassword.Succeeded)
             {
-                ModelState.AddModelErrorList(resultChangePassword.Errors.Select(x => x.Description).ToList());
+                ModelState.AddModelErrorList(resultChangePassword.Errors);
                 return View();
             }
 
@@ -82,8 +79,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             await _signInManager.PasswordSignInAsync(currentUser, request.PasswordNew, true, false);
 
             TempData["SuccessMessage"] = "Sifreniz basari ile degistirilmisdir.";
-            
-            return View();  
+
+            return View();
         }
 
         public async Task<IActionResult> UserEdit()
@@ -91,17 +88,17 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             ViewBag.genderList = new SelectList(Enum.GetNames(typeof(Gender)));
             var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
-            var userEditViewModel = new UserEditViewModel()
+            var userEditViewMode = new UserEditViewModel
             {
                 UserName = currentUser.UserName!,
-                Email = currentUser.Email!,
                 Phone = currentUser.PhoneNumber!,
+                Email = currentUser.Email!,
                 BirthDate = currentUser.BirthDate,
-                City = currentUser.City,
                 Gender = currentUser.Gender,
+                City = currentUser.City,
             };
 
-            return View(userEditViewModel);
+            return View(userEditViewMode);
         }
 
         [HttpPost]
@@ -112,7 +109,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
-            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
             currentUser.UserName = request.UserName;
             currentUser.Email = request.Email;
@@ -125,6 +122,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             {
                 var wwwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
 
+                //Path.GetExtension => sekilin sonu hansi fortmadadisa onu yazdirsin mes: jpg,png ve.s;
                 string randomFileName = $"{Guid.NewGuid().ToString()}{Path.GetExtension(request.Picture.FileName)}";
 
                 var newPicturePath = Path.Combine(wwwrootFolder!.First(x => x.Name == "userpictures").PhysicalPath!, randomFileName);
@@ -159,12 +157,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
 
 
-
-
-
-
-
-
             TempData["SuccessMessage"] = "Üye bilgileri başarıyla değiştirilmiştir";
 
             var userEditViewModel = new UserEditViewModel()
@@ -179,7 +171,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             return View(userEditViewModel);
         }
-
 
         [HttpGet]
         public IActionResult Claims()

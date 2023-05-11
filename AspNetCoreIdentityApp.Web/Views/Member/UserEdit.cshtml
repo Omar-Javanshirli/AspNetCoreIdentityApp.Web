@@ -9,11 +9,6 @@
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }
 
-
-
-
-
-
 <div class="row">
     <div class="col-md-6 offset-md-3">
         <h2>Kullanıcı Bilgi Güncelleme </h2>
@@ -25,10 +20,8 @@
             </div>
         }
 
-
         <div asp-validation-summary=ModelOnly class="alert alert-danger" role="alert">
         </div>
-
 
         <form asp-controller="Member" asp-action="UserEdit" method="post" enctype="multipart/form-data">
 
@@ -40,7 +33,6 @@
                     <span class="text-danger" asp-validation-for="UserName"></span>
                 </div>
             </div>
-
 
             <div class="row mb-3">
                 <label for="PasswordConfirm" class="col-md-4 col-form-label" asp-for="Email"></label>
@@ -58,8 +50,6 @@
                 </div>
             </div>
 
-
-         
 
             <div class="row mb-3">
                 <label for="PasswordConfirm" class="col-md-4 col-form-label" asp-for="BirthDate"></label>
@@ -84,8 +74,6 @@
                 <div class="col-md-8">
                    <select  class="form-control" asp-for="Gender" asp-items="ViewBag.genderList">
                        <option value="">Cinsiyet seçiniz</option>
-
-
                    </select>
                     <span class="text-danger" asp-validation-for="Gender"></span>
                 </div>
@@ -100,21 +88,11 @@
                 </div>
             </div>
 
-
-
-
-
-
-
-
-
             <div class="row mb-3">
                 <div class="col-md-8 offset-md-4">
                     <button type="submit" class="btn btn-primary">Güncelle</button>
                 </div>
             </div>
-
-
 
         </form>
     </div>

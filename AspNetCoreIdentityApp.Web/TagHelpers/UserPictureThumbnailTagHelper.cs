@@ -11,14 +11,10 @@ namespace AspNetCoreIdentityApp.Web.TagHelpers
             output.TagName = "img";
 
             if (string.IsNullOrEmpty(PictureUrl))
-            {
                 output.Attributes.SetAttribute("src", "/userpictures/default_user_picture.jpg");
-            }
-            else
 
-            {
+            else
                 output.Attributes.SetAttribute("src", $"/userpictures/{PictureUrl}");
-            }
         }
     }
 }
