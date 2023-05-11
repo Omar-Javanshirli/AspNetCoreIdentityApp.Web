@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "admin")]
+
     [Area("Admin")]
     public class RolesController : Controller
     {
@@ -20,162 +20,82 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             _roleManager = roleManager;
             _userManager = userManager;
         }
-        [Authorize(Roles = "role-action")]
+
+
+
         public async Task<IActionResult> Index()
         {
-           
             var roles = await _roleManager.Roles.Select(x => new RoleViewModel()
             {
                 Id = x.Id,
                 Name = x.Name!
             }).ToListAsync();
 
-
-
             return View(roles);
         }
 
-
-        [Authorize(Roles ="role-action")]
         public IActionResult RoleCreate()
         {
             return View();
         }
 
-
-        [Authorize(Roles = "role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleCreate(RoleCreateViewModel request)
         {
             var result = await _roleManager.CreateAsync(new AppRole() { Name = request.Name });
 
-            if (!result.Succeeded)
+            if (result.Succeeded)
             {
-
                 ModelState.AddModelErrorList(result.Errors);
                 return View();
             }
 
-
-            TempData["SuccessMessage"] = "Rol oluşturulmuştur.";
+            TempData["SuccessMessage"] = "Rol olusturulmustur";
             return RedirectToAction(nameof(RolesController.Index));
-
-
-
         }
 
-
-        [Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleUpdate(string id)
         {
             var roleToUpdate = await _roleManager.FindByIdAsync(id);
 
             if (roleToUpdate == null)
-            {
-                throw new Exception("Güncellenecek rol bulunamamıştır.");
-            }
-
+                throw new Exception("Guncellenecek role bulunamamistir");
 
             return View(new RoleUpdateViewModel() { Id = roleToUpdate.Id, Name = roleToUpdate!.Name! });
         }
 
-        [Authorize(Roles = "role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel request)
         {
-
             var roleToUpdate = await _roleManager.FindByIdAsync(request.Id);
 
             if (roleToUpdate == null)
-            {
-                throw new Exception("Güncellenecek rol bulunamamıştır.");
-            }
+                throw new Exception("Guncellenecek role bulunamamistir");
 
             roleToUpdate.Name = request.Name;
 
             await _roleManager.UpdateAsync(roleToUpdate);
 
-
-            ViewData["SuccessMessage"] = "Rol bilgisi güncellenmiştir";
+            ViewData["SuccessMessage"] = "Rol bilgisi Guncellenmistir";
 
             return View();
         }
 
-        [Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleDelete(string id)
         {
-            var roleToDelete = await _roleManager.FindByIdAsync(id);
+            var roleTodelete = await _roleManager.FindByIdAsync(id);
 
-            if (roleToDelete == null)
-            {
-                throw new Exception("Silinecek rol bulunamamıştır.");
-            }
+            if (roleTodelete == null)
+                throw new Exception("Silinecek role bulunamamistir");
 
-            var result = await _roleManager.DeleteAsync(roleToDelete);
+            var result = await _roleManager.DeleteAsync(roleTodelete);
 
             if (!result.Succeeded)
-            {
                 throw new Exception(result.Errors.Select(x => x.Description).First());
-            }
 
-            TempData["SuccessMessage"] = "Rol silinmiştir";
+            TempData["SuccessMessage"] = "Rol Silinmistir";
+
             return RedirectToAction(nameof(RolesController.Index));
-
-
-
-
-        }
-
-
-        public async Task<IActionResult> AssignRoleToUser(string id)
-        {
-            var currentUser = (await _userManager.FindByIdAsync(id))!;
-            ViewBag.userId = id;
-            var roles = await _roleManager.Roles.ToListAsync();
-            var userRoles = await _userManager.GetRolesAsync(currentUser);
-            var roleViewModelList = new List<AssignRoleToUserViewModel>();
-
-            foreach (var role in roles)
-            {
-
-                var assignRoleToUserViewModel = new AssignRoleToUserViewModel() { Id = role.Id, Name = role.Name! };
-
-
-                if (userRoles.Contains(role.Name!))
-                {
-                    assignRoleToUserViewModel.Exist = true;
-                }
-
-                roleViewModelList.Add(assignRoleToUserViewModel);
-
-
-            }
-
-            return View(roleViewModelList);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AssignRoleToUser(string userId, List<AssignRoleToUserViewModel> requestList)
-        {
-
-            var userToAssignRoles = (await _userManager.FindByIdAsync(userId))!;
-
-            foreach (var role in requestList)
-            {
-
-                if (role.Exist)
-                {
-                    await _userManager.AddToRoleAsync(userToAssignRoles, role.Name);
-
-                }
-                else
-                {
-                    await  _userManager.RemoveFromRoleAsync(userToAssignRoles, role.Name);
-                }
-
-            }
-
-            return RedirectToAction(nameof(HomeController.UserList),"Home");
         }
     }
 }
