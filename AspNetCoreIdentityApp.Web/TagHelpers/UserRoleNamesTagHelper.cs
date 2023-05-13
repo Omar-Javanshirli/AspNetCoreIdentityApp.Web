@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AspNetCoreIdentityApp.Web.TagHelpers
 {
-    public class UserRoleNamesTagHelper:TagHelper
+    public class UserRoleNamesTagHelper : TagHelper
     {
         public string UserId { get; set; } = null!;
 
@@ -18,7 +18,6 @@ namespace AspNetCoreIdentityApp.Web.TagHelpers
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-
             var user = await _userManager.FindByIdAsync(UserId);
 
             var userRoles = await _userManager.GetRolesAsync(user!);
@@ -31,7 +30,6 @@ namespace AspNetCoreIdentityApp.Web.TagHelpers
             });
 
             output.Content.SetHtmlContent(stringBuilder.ToString());
-            
         }
     }
 }

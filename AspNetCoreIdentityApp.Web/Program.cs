@@ -80,32 +80,19 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("Permissions.Order.Read", policy =>
     {
-
         policy.RequireClaim("permission", Permissions.Order.Read);
-     
-
     });
 
     options.AddPolicy("Permissions.Order.Delete", policy =>
     {
-
         policy.RequireClaim("permission", Permissions.Order.Delete);
-
-
     });
 
 
     options.AddPolicy("Permissions.Stock.Delete", policy =>
     {
-
         policy.RequireClaim("permission", Permissions.Stock.Delete);
-
-
     });
-
-
-
-
 });
 
 //Cookie optimization

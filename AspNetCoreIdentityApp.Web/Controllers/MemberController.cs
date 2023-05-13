@@ -219,11 +219,10 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         {
             string message = string.Empty;
 
-
-
             message = "Bu sayfayı görmeye yetkiniz yoktur. Yetki almak için  yöneticiniz ile görüşebilirsiniz.";
 
             ViewBag.message = message;
+
             return View();
         }
     }

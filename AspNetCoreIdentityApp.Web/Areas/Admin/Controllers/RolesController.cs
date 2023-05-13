@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 {
-
+    [Authorize(Roles ="Admin")]
     [Area("Admin")]
     public class RolesController : Controller
     {
@@ -21,8 +21,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             _userManager = userManager;
         }
 
-
-
+        [Authorize(Roles = "role-action")]
         public async Task<IActionResult> Index()
         {
             var roles = await _roleManager.Roles.Select(x => new RoleViewModel()
@@ -34,11 +33,13 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return View(roles);
         }
 
+        [Authorize(Roles ="role-action")]
         public IActionResult RoleCreate()
         {
             return View();
         }
 
+        [Authorize(Roles = "role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleCreate(RoleCreateViewModel request)
         {
@@ -54,6 +55,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(RolesController.Index));
         }
 
+        [Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleUpdate(string id)
         {
             var roleToUpdate = await _roleManager.FindByIdAsync(id);
@@ -64,6 +66,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return View(new RoleUpdateViewModel() { Id = roleToUpdate.Id, Name = roleToUpdate!.Name! });
         }
 
+        [Authorize(Roles = "role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel request)
         {
@@ -81,6 +84,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return View();
         }
 
+        [Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleDelete(string id)
         {
             var roleTodelete = await _roleManager.FindByIdAsync(id);
@@ -96,6 +100,51 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             TempData["SuccessMessage"] = "Rol Silinmistir";
 
             return RedirectToAction(nameof(RolesController.Index));
+        }
+
+        public async Task<IActionResult> AssignRoleToUser(string id)
+        {
+            var currentUser = (await _userManager.FindByIdAsync(id))!;
+
+            ViewBag.userId = id;
+
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            var userRoles = await _userManager.GetRolesAsync(currentUser);
+
+            var roleViewModelList = new List<AssignRoleToUserViewModel>();
+
+            foreach (var item in roles)
+            {
+                var assignRoleToUserViewModel = new AssignRoleToUserViewModel()
+                {
+                    Id = item.Id,
+                    Name = item.Name!,
+                };
+
+                if (userRoles.Contains(item.Name!))
+                    assignRoleToUserViewModel.Exist = true;
+
+                roleViewModelList.Add(assignRoleToUserViewModel);
+            }
+
+            return View(roleViewModelList);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignRoleToUser(string userId, List<AssignRoleToUserViewModel> requestList)
+        {
+            var userToAssignRoles = await _userManager.FindByIdAsync(userId);
+
+            foreach (var role in requestList)
+            {
+                if (role.Exist)
+                    await _userManager.AddToRoleAsync(userToAssignRoles!, role.Name);
+                else
+                    await _userManager.RemoveFromRoleAsync(userToAssignRoles!, role.Name);
+            }
+
+            return RedirectToAction(nameof(HomeController.UserList),"Home");
         }
     }
 }
