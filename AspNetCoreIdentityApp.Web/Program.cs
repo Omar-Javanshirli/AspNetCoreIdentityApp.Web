@@ -33,6 +33,9 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 //IFileProvider interface-le isdediyimiz file cata bileriy.
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 
+//IHttpContextAccessor ucun...
+//builder.Services.AddHttpContextAccessor();
+
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 //Extention method 
@@ -62,14 +65,14 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("ViolencePolicy", policy =>
     {
-        policy.AddRequirements(new ViolenceRequirement() {  ThresholdAge=18});
+        policy.AddRequirements(new ViolenceRequirement() { ThresholdAge = 18 });
 
 
     });
 
     options.AddPolicy("OrderPermissionReadAndDelete", policy =>
     {
-       
+
         policy.RequireClaim("permission", Permissions.Order.Read);
         policy.RequireClaim("permission", Permissions.Order.Delete);
         policy.RequireClaim("permission", Permissions.Stock.Delete);
@@ -113,11 +116,11 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 var app = builder.Build();
 
-using (var scope= app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
 
-   //await  PermissionSeed.Seed(roleManager);
+    //await  PermissionSeed.Seed(roleManager);
 }
 
 

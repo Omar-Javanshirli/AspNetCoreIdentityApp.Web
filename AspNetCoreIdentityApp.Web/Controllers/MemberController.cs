@@ -19,6 +19,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IFileProvider _fileProvider;
 
+        //contrelller-den basqa her hansisa bir yer de Httcontext-de catmax ucun bu interface-den istifade olunur
+        //private readonly IHttpContextAccessor _contextAccessor;
+
         public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider)
         {
             _signInManager = signInManager;
@@ -28,6 +31,10 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+            //Cookie-icindeki datalara catmagin yontemi
+            //var userClaims = User.Claims.ToList();
+            //var email = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Email);
+
             var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
 
             var userViewModel = new UserViewModel
@@ -175,9 +182,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         [HttpGet]
         public IActionResult Claims()
         {
-
-
-
             var userClaimList = User.Claims.Select(x => new ClaimViewModel()
             {
                 Issuer = x.Issuer,
@@ -186,7 +190,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }).ToList();
 
             return View(userClaimList);
-
         }
 
 
