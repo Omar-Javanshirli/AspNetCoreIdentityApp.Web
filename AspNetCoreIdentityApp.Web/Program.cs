@@ -56,6 +56,8 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("ExchangePolicy", policy =>
     {
+        //numunune ucun  
+        //policy.AddRequirements(new ExchangeExpireRequirement() { Age=11});
         policy.AddRequirements(new ExchangeExpireRequirement());
     });
 
