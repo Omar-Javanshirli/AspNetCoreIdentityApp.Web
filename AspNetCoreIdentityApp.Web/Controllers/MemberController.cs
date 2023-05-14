@@ -154,14 +154,10 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
 
             if (request.BirthDate.HasValue)
-            {
                 await _signInManager.SignInWithClaimsAsync(currentUser, true, new[] { new Claim("birthdate", currentUser.BirthDate!.Value.ToString()) });
-            }
 
             else
-            {
-                await _signInManager.SignInAsync(currentUser, true);
-            }
+                await _signInManager.SignInAsync(currentUser,true);
 
 
             TempData["SuccessMessage"] = "Üye bilgileri başarıyla değiştirilmiştir";
@@ -197,9 +193,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         [HttpGet]
         public IActionResult AnkaraPage()
         {
-
             return View();
-
         }
 
         [Authorize(Policy = "ExchangePolicy")]
@@ -207,7 +201,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         public IActionResult ExchangePage()
         {
             return View();
-
         }
 
 

@@ -81,8 +81,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 ModelState.AddModelErrorList(new List<string>() { $"Email veya şifre yanlış", $"Başarısız giriş sayısı = {await _UserManager.GetAccessFailedCountAsync(hasUser)}" });
                 return View();
             }
-           
-            if(hasUser.BirthDate.HasValue)
+
+            if (hasUser.BirthDate.HasValue)
             {
                 await _signInManager.SignInWithClaimsAsync(hasUser, model.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDate.Value.ToString()) });
             }
@@ -94,12 +94,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         public async Task<IActionResult> SignUp(SignUpViewModel request)
         {
             if (!ModelState.IsValid)
-            {
                 return View();
-            }
 
             var identityResult = await _UserManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm);
-
 
             if (!identityResult.Succeeded)
             {
@@ -111,10 +108,10 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             var user = await _UserManager.FindByNameAsync(request.UserName);
 
+            // bir basa Databasada AspNetUserClaims cedveline yazilir AddClaimAsync methodu vasitesi ile.
             var claimResult = await _UserManager.AddClaimAsync(user!, exchangeExpireClaim);
 
-
-            if(!claimResult.Succeeded)
+            if (!claimResult.Succeeded)
             {
                 // select -nen iceni girib xetanin description-larini elde ediriy.
                 ModelState.AddModelErrorList(claimResult.Errors.Select(x => x.Description).ToList());
@@ -122,8 +119,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
 
             TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıla gerçekleşmiştir.";
-
-            return RedirectToAction(nameof(HomeController.SignUp));
+             
+            return RedirectToAction(nameof(HomeController.SignIn));
         }
 
         public IActionResult ForgetPassword()

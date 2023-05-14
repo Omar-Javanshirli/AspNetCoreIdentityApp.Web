@@ -52,22 +52,16 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AnkaraPolicy", policy =>
     {
         policy.RequireClaim("city", "ankara");
-
-
     });
 
     options.AddPolicy("ExchangePolicy", policy =>
     {
         policy.AddRequirements(new ExchangeExpireRequirement());
-
-
     });
 
     options.AddPolicy("ViolencePolicy", policy =>
     {
         policy.AddRequirements(new ViolenceRequirement() { ThresholdAge = 18 });
-
-
     });
 
     options.AddPolicy("OrderPermissionReadAndDelete", policy =>
@@ -78,7 +72,6 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim("permission", Permissions.Stock.Delete);
 
     });
-
 
 
     options.AddPolicy("Permissions.Order.Read", policy =>
