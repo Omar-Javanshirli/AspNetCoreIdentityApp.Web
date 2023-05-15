@@ -66,9 +66,16 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
+            //var passwordCheck=await _UserManager.CheckPasswordAsync(hasUser, model.Password);
+
+            //if (!passwordCheck)
+            //{
+            //    ModelState.AddModelError(string.Empty, "Email veya şifre yanlış");
+            //    return View();
+            //}
+
             // eger bu method ugurlu basa catsa bizim ucun bir cookie yaradacaq;
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
-
 
             if (signInResult.IsLockedOut)
             {
@@ -84,8 +91,11 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             if (hasUser.BirthDate.HasValue)
             {
-                await _signInManager.SignInWithClaimsAsync(hasUser, model.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDate.Value.ToString()) });
+                //User Claim-larla beraber cookisini yaradir. Login olmax cookie yaratmaq demekdir.
+                await _signInManager.SignInWithClaimsAsync(hasUser, model.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDate.Value.ToString()) 
+                ,new Claim("gender",hasUser.Gender!.Value.ToString())});
             }
+
             return Redirect(returnUrl!);
 
         }

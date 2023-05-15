@@ -16,9 +16,10 @@ namespace AspNetCoreIdentityApp.Web.ClaimProviders
 
 
         //Cookie-ye datani eleve etmey hansiki bu data databasaya yazilmiyacax yalniz cookie-nin icinde qalacax.
+        //Cooki-den datalar Claim-e cevrildiyi zaman her sefer bu method cagrilir ve isdeyir. Sadace Login olan userler ucun.
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            //ClaimsIdentity => istifadecinin kinlik bilgileri Claimler terefinnen yaradilir
+            //ClaimsIdentity => istifadecinin kimlik bilgileri Claimler terefinnen yaradilir
             var identityUser = principal.Identity as ClaimsIdentity;
 
             var currentUser = await _userManager.FindByNameAsync(identityUser!.Name!);

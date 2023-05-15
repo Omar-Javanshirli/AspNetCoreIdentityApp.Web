@@ -1,18 +1,15 @@
-using AspNetCoreIdentityApp.Web.Models;
-using Microsoft.EntityFrameworkCore;
-using AspNetCoreIdentityApp.Web.Extenisons;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
-using AspNetCoreIdentityApp.Web.OptionsModels;
-using Microsoft.Extensions.DependencyInjection;
-using AspNetCoreIdentityApp.Web.Services;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.Authentication;
 using AspNetCoreIdentityApp.Web.ClaimProviders;
-using AspNetCoreIdentityApp.Web.Requirements;
-using Microsoft.AspNetCore.Authorization;
-using AspNetCoreIdentityApp.Web.Seeds;
+using AspNetCoreIdentityApp.Web.Extenisons;
+using AspNetCoreIdentityApp.Web.Models;
+using AspNetCoreIdentityApp.Web.OptionsModels;
 using AspNetCoreIdentityApp.Web.PermissionsRoot;
+using AspNetCoreIdentityApp.Web.Requirements;
+using AspNetCoreIdentityApp.Web.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,7 +53,7 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("ExchangePolicy", policy =>
     {
-        //numunune ucun  
+        //Parametir gondermey ucun numunune   
         //policy.AddRequirements(new ExchangeExpireRequirement() { Age=11});
         policy.AddRequirements(new ExchangeExpireRequirement());
     });
@@ -68,13 +65,10 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("OrderPermissionReadAndDelete", policy =>
     {
-
         policy.RequireClaim("permission", Permissions.Order.Read);
         policy.RequireClaim("permission", Permissions.Order.Delete);
         policy.RequireClaim("permission", Permissions.Stock.Delete);
-
     });
-
 
     options.AddPolicy("Permissions.Order.Read", policy =>
     {

@@ -21,15 +21,12 @@ namespace AspNetCoreIdentityApp.Web.Requirements
 
             Claim birthDateClaim = context.User.FindFirst("birthdate")!;
 
-
             var today = DateTime.Now;
             var birthDate = Convert.ToDateTime(birthDateClaim.Value);
             var age = today.Year - birthDate.Year;
 
 
             if (birthDate > today.AddYears(-age)) age--;
-
-
 
             if (requirement.ThresholdAge>age)
             {
@@ -39,10 +36,6 @@ namespace AspNetCoreIdentityApp.Web.Requirements
 
             context.Succeed(requirement);
             return Task.CompletedTask;
-
-
-
-
         }
     }
 }
