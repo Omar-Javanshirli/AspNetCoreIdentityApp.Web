@@ -92,8 +92,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             if (hasUser.BirthDate.HasValue)
             {
                 //User Claim-larla beraber cookisini yaradir. Login olmax cookie yaratmaq demekdir.
-                await _signInManager.SignInWithClaimsAsync(hasUser, model.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDate.Value.ToString()) 
-                ,new Claim("gender",hasUser.Gender!.Value.ToString())});
+                await _signInManager.SignInWithClaimsAsync(hasUser, model.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDate.Value.ToString()) });
             }
 
             return Redirect(returnUrl!);
@@ -129,7 +128,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
 
             TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıla gerçekleşmiştir.";
-             
+
             return RedirectToAction(nameof(HomeController.SignIn));
         }
 

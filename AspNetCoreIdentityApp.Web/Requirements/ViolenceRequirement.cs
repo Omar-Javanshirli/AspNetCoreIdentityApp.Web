@@ -25,7 +25,6 @@ namespace AspNetCoreIdentityApp.Web.Requirements
             var birthDate = Convert.ToDateTime(birthDateClaim.Value);
             var age = today.Year - birthDate.Year;
 
-
             if (birthDate > today.AddYears(-age)) age--;
 
             if (requirement.ThresholdAge>age)
