@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Index";
 }
+
 @inject IAuthorizationService authorizationService 
 
 
@@ -11,6 +12,7 @@
 {
     <button class="btn btn-primary">Permissions.Order.Read</button>
 }
+
 @if (authorizationService.AuthorizeAsync(User, "Permissions.Order.Delete").Result.Succeeded)
 {
     <button class="btn btn-primary">Permissions.Order.Delete</button>

@@ -4,6 +4,7 @@ using AspNetCoreIdentityApp.Web.Models;
 using AspNetCoreIdentityApp.Web.OptionsModels;
 using AspNetCoreIdentityApp.Web.PermissionsRoot;
 using AspNetCoreIdentityApp.Web.Requirements;
+using AspNetCoreIdentityApp.Web.Seeds;
 using AspNetCoreIdentityApp.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -105,11 +106,12 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 var app = builder.Build();
 
+//Yalniz bir defe isdiyicey
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
 
-    //await  PermissionSeed.Seed(roleManager);
+    await  PermissionSeed.Seed(roleManager);
 }
 
 

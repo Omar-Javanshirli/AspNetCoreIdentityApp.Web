@@ -21,7 +21,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             _userManager = userManager;
         }
 
-        [Authorize(Roles = "role-action")]
+        [Authorize(Roles = "Admin,role-action")]
         public async Task<IActionResult> Index()
         {
             var roles = await _roleManager.Roles.Select(x => new RoleViewModel()
@@ -33,13 +33,13 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return View(roles);
         }
 
-        [Authorize(Roles ="role-action")]
+        [Authorize(Roles ="Admin,role-action")]
         public IActionResult RoleCreate()
         {
             return View();
         }
 
-        [Authorize(Roles = "role-action")]
+        [Authorize(Roles = "Admin,role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleCreate(RoleCreateViewModel request)
         {
@@ -55,7 +55,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(RolesController.Index));
         }
 
-        [Authorize(Roles = "role-action")]
+        [Authorize(Roles = "Admin,role-action")]
         public async Task<IActionResult> RoleUpdate(string id)
         {
             var roleToUpdate = await _roleManager.FindByIdAsync(id);
@@ -66,7 +66,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return View(new RoleUpdateViewModel() { Id = roleToUpdate.Id, Name = roleToUpdate!.Name! });
         }
 
-        [Authorize(Roles = "role-action")]
+        [Authorize(Roles = "Admin,role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel request)
         {
@@ -84,7 +84,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return View();
         }
 
-        [Authorize(Roles = "role-action")]
+        [Authorize(Roles = "Admin,role-action")]
         public async Task<IActionResult> RoleDelete(string id)
         {
             var roleTodelete = await _roleManager.FindByIdAsync(id);

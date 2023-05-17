@@ -2,7 +2,6 @@
 {
     public static class Permissions
     {
-
         public static class Stock
         {
             public const string Read = "Permissions.Stock.Read";
