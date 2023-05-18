@@ -24,10 +24,10 @@ namespace AspNetCoreIdentityApp.Web.ClaimProviders
             var identityUser = principal.Identity as ClaimsIdentity;
 
             var currentUser = await _userManager.FindByNameAsync(identityUser!.Name!);
-
-            if (String.IsNullOrEmpty(currentUser!.City))
-                return principal;
             
+            if (String.IsNullOrEmpty(currentUser?.City))
+                return principal;
+
             //city bizi databasadadki User cedvelinde yox idi biz bunu soradan elave etdik. buna gore de bu datalar calimlara yazilmir.
             //bele oldugu zaman biz dinamic yoxlanislar ede bilmiriy. buna gore biz bu melumati clamin icine elave ediry asagida 
             //gosterildiyi kimi

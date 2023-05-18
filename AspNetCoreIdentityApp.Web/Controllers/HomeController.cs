@@ -202,6 +202,79 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+
+        public IActionResult FacebookLogin(string ReturnUrl)
+        {
+            string RedirectUrl = Url.Action("ExternalResponse", "Home", new { ReturnUrl = ReturnUrl })!;
+
+            //Facebooka giris ucun lazim olan propertiler
+            var properities = _signInManager.ConfigureExternalAuthenticationProperties("Facebook", RedirectUrl);
+
+            //ChallengeResult Parametre olarax ne qebul edirse itifadecini ora yonledirir;
+            return new ChallengeResult("Facebook", properities);
+        }
+
+        public IActionResult GoogleLogin(string ReturnUrl)
+        {
+            string RedirectUrl = Url.Action("ExternalResponse", "Home", new { ReturnUrl = ReturnUrl })!;
+
+            //Facebooka giris ucun lazim olan propertiler
+            var properities = _signInManager.ConfigureExternalAuthenticationProperties("Google", RedirectUrl);
+
+            //ChallengeResult Parametre olarax ne qebul edirse itifadecini ora yonledirir;
+            return new ChallengeResult("Google", properities);
+        }
+
+        public async Task<IActionResult> ExternalResponse(string ReturnUrl = "/")
+        {
+            //Login provider login provider key kimi melematlari ozunde saxliyir.
+            //Login provider => hardan daxil olun facebook, google bu kimi melmatlari saxliyir
+            //login provderKey => daxil oldugu mes(facebook, twitter) ve.s ordaki user idsidir.
+            ExternalLoginInfo info = (await _signInManager.GetExternalLoginInfoAsync())!;
+
+            if (info == null)
+                return RedirectToAction("login");
+
+            Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, true);
+
+            if (result.Succeeded)
+                return Redirect(ReturnUrl);
+
+            AppUser user = new AppUser();
+
+            //facebookdan ve ya basqa bir saytdan gelen claimleri elde edirem. info.principial vasitesile edirem.
+            user.Email = info.Principal.FindFirst(ClaimTypes.Email)?.Value;
+            string externalUserId = info.Principal.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
+            if (info.Principal.HasClaim(x => x.Type == ClaimTypes.Name))
+            {
+                string userName = info.Principal.FindFirst(ClaimTypes.Name)!.Value;
+                userName = userName?.Replace(' ', '-')?.ToLower() + externalUserId?.Substring(0, 5);
+                user.UserName = userName;
+            }
+            else
+                user.UserName = info.Principal.FindFirst(ClaimTypes.Email)?.Value;
+
+            IdentityResult createResult = await _UserManager.CreateAsync(user);
+
+            if (createResult.Succeeded)
+            {
+                //Databasada ki UserLogin Cedveline melumatlarin yazilmasi;
+                var loginResult = await _UserManager.AddLoginAsync(user, info);
+                if (loginResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, true);
+                    return Redirect(ReturnUrl);
+                }
+                else
+                    ModelState.AddModelError(string.Empty, "Failed to add external login.");
+            }
+            else
+                ModelState.AddModelError(string.Empty, "Email or password is incorrect.");
+
+            return RedirectToAction("Error");
+        }
+
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

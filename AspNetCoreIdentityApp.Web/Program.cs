@@ -1,4 +1,4 @@
-using AspNetCoreIdentityApp.Web.ClaimProviders;
+﻿using AspNetCoreIdentityApp.Web.ClaimProviders;
 using AspNetCoreIdentityApp.Web.Extenisons;
 using AspNetCoreIdentityApp.Web.Models;
 using AspNetCoreIdentityApp.Web.OptionsModels;
@@ -88,6 +88,21 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
+//thirt party Authentication for facebook
+builder.Services.AddAuthentication()
+    .AddFacebook(options =>
+    {
+        options.AppId = builder!.Configuration["Authentication:Facebook:AppId"]!;
+        options.AppSecret = builder!.Configuration["Authentication:Facebook:AppSecret"]!;
+    }).
+    AddGoogle(options =>
+    {
+        options.ClientId = builder!.Configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = builder!.Configuration["Authentication:Google:ClientSecret"]!;
+    });
+
+
+
 //Cookie optimization
 builder.Services.ConfigureApplicationCookie(opt =>
 {
@@ -111,7 +126,7 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
 
-    await  PermissionSeed.Seed(roleManager);
+    await PermissionSeed.Seed(roleManager);
 }
 
 
