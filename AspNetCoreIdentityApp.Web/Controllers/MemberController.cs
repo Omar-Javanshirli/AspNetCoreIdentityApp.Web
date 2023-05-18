@@ -157,7 +157,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 await _signInManager.SignInWithClaimsAsync(currentUser, true, new[] { new Claim("birthdate", currentUser.BirthDate!.Value.ToString()) });
 
             else
-                await _signInManager.SignInAsync(currentUser,true);
+                await _signInManager.SignInAsync(currentUser, true);
 
 
             TempData["SuccessMessage"] = "Üye bilgileri başarıyla değiştirilmiştir";
@@ -220,6 +220,15 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             ViewBag.message = message;
 
             return View();
+        }
+
+        public IActionResult TwoFactorAuth()
+        {
+            var currentUser = _userManager.FindByNameAsync(User!.Identity!.Name!).Result;
+
+            TempData["SuccessMessage"] = "wrong";
+
+            return View(new TwoFactorAuthViewModel() { TwoFactorType = (TwoFactor)currentUser!.TwoFactor!});
         }
     }
 }

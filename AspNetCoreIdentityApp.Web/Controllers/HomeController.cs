@@ -105,7 +105,13 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-            var identityResult = await _UserManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm);
+            var identityResult = await _UserManager.CreateAsync(new()
+            {
+                UserName = request.UserName,
+                PhoneNumber = request.Phone,
+                Email = request.Email,
+                TwoFactor = 0
+            }, request.PasswordConfirm);
 
             if (!identityResult.Succeeded)
             {
