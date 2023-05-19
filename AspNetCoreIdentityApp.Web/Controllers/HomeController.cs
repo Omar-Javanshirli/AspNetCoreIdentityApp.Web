@@ -102,6 +102,62 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
         }
 
+        public async Task<IActionResult> TwoFactorLogin(string ReturnUrl = "/")
+        {
+            //Bu method ilk once Identity.TwoFactorUserId adli cookie-den gedin user id-ni tapir.
+            //daha sonra databasaya gedir bu userId-ye sahib userin melumatlarin tapib getirir.
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            TempData["ReturnUrl"] = ReturnUrl;
+
+            switch ((TwoFactor)user!.TwoFactor!)
+            {
+                case TwoFactor.None:
+                    break;
+                case TwoFactor.Phone:
+                    break;
+                case TwoFactor.Email:
+                    break;
+                case TwoFactor.MicrosoftGoogle:
+                    break;
+                default:
+                    break;
+            }
+
+            return View(new TwoFactorLoginViewModel() { TwoFactorType = (TwoFactor)user.TwoFactor });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TwoFactorLogin(TwoFactorLoginViewModel request)
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            ModelState.Clear();
+
+            bool isSuccessAuth = false;
+
+            if ((TwoFactor)user!.TwoFactor! == TwoFactor.MicrosoftGoogle)
+            {
+                Microsoft.AspNetCore.Identity.SignInResult result = null;
+
+                if (request.IsRecoverCode)
+                    result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(request.VerificationCode);
+                else
+                    result = await _signInManager.TwoFactorAuthenticatorSignInAsync(request.VerificationCode, true, false);
+
+                if (result.Succeeded)
+                    isSuccessAuth = true;
+                else
+                    ModelState.AddModelError(string.Empty, "Dogrulama kodu yanlis");
+            }
+
+            if (isSuccessAuth == true)
+                return Redirect(TempData["ReturnUrl"]!.ToString()!);
+
+            request.TwoFactorType = (TwoFactor)user.TwoFactor;
+            return View(request);
+        }
+
         [HttpPost]
         public async Task<IActionResult> SignUp(SignUpViewModel request)
         {
