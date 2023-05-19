@@ -9,17 +9,17 @@
 <div class="row">
     <div class="col-md-12">
 
-        @if (TempData["SuccessMessage"] != null)
+        @if (TempData["message"] != null)
         {
             <div class="alert alert-info" role="alert">
-                @TempData["SuccessMessage"]
+                @TempData["message"]
             </div>
         }
 
         <form asp-action="TwoFactorAuth" method="post">
 
             <div class="form-group">
-                <label asp-for="TwoFactorType" class="control-label"></label>
+                <label asp-for="TwoFactorType"></label>
                 <select class="from-control" asp-for="TwoFactorType" asp-items="Html.GetEnumSelectList<TwoFactor>()"></select>
             </div>
 
@@ -30,5 +30,20 @@
         </form>
     </div>
 
- 
+    @if (TempData["recoverCodes"] != null)
+    {
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                Asagidaki kodlari guvenli bir yerde saklayiniz.Microsoft/Goole Auhenticator uygulamasini kullanmadiginiz durumlarda
+                bu kurtarma kodlarini kullana bilirsiniz.
+            </div>
+        </div>
+
+        <div class="alert alert-secondary">
+            @foreach (var item in TempData["recoverCodes"] as string[])
+            {
+                <strong>@item</strong>
+            }
+        </div>
+    }
 </div>

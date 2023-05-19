@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "TwoFactorWithAuthenticator";
+}
+
+@model TwoFactorAuthViewModel;
+
+@section Scripts
+    {
+    <script type="text/javascript">
+
+        var uri = "@Model.AuthenticatorUri";
+
+        new QRCode(document.getElementById("qrcode"), {
+
+            text: uri,
+            width: 128,
+            height: 128,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    </script>
+}
+
+<h2>Iki Adimli Kimlik Dogrulama</h2>
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="alert alert-info">
+            1.Addim :Asagidaki barkopdu telefonunuzdaki Google/Microsoft Authentication uygulamasina taratiniz.
+            ve ya asagidaki kodu telefonunuza giriniz.
+        </div>
+        <strong class="text-danger">
+            key:
+            <strong class="text-primary">@Model.SharedKey</strong>
+        </strong>
+
+        <hr />
+
+        <div id="qrcode">
+
+        </div>
+
+        <div class="alert alert-info md-3">
+            2.Addim : Telefonunuzadaki codu asagidaki alana giriniz.
+        </div>
+
+        <form asp-action="TwoFactorWithAuthenticator" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger">
+            </div>
+
+            <div class="form-group">
+                <label asp-for="VerificationCode"></label>
+                <input asp-for="VerificationCode" class="form-control" />
+                <span asp-validation-for="VerificationCode"></span>
+
+                <input type="hidden" asp-for="AuthenticatorUri" />
+                <input type="hidden" asp-for="SharedKey" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value=" Aktif et" class="btn btn-success" />
+            </div>
+        </form>
+    </div>
+</div>

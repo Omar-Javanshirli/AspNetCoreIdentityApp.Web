@@ -6,7 +6,7 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
     public class TwoFactorAuthViewModel
     {
         public string? SharedKey { get; set; } 
-        public string? Authenticator { get; set; }
+        public string? AuthenticatorUri { get; set; }
 
         [Display(Name = "Dogrulama kodunuz")]
         [Required(ErrorMessage = "Dogrulama kodu gereklidir")]

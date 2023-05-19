@@ -1,5 +1,6 @@
 ﻿using AspNetCoreIdentityApp.Web.Extenisons;
 using AspNetCoreIdentityApp.Web.Models;
+using AspNetCoreIdentityApp.Web.Services.TwoFactorService;
 using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,15 +19,17 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly IFileProvider _fileProvider;
+        private readonly TwoFactorService _twoFactorService;
 
         //contrelller-den basqa her hansisa bir yer de Httcontext-de catmax ucun bu interface-den istifade olunur
         //private readonly IHttpContextAccessor _contextAccessor;
 
-        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider)
+        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider, TwoFactorService twoFactorService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _fileProvider = fileProvider;
+            _twoFactorService = twoFactorService;
         }
 
         public async Task<IActionResult> Index()
@@ -222,13 +225,83 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             return View();
         }
 
-        public IActionResult TwoFactorAuth()
+        [HttpGet]
+        public async Task<IActionResult> TwoFactorWithAuthenticator()
         {
             var currentUser = _userManager.FindByNameAsync(User!.Identity!.Name!).Result;
 
-            TempData["SuccessMessage"] = "wrong";
+            //Databasada UsersTokens Cedvelinde usere aid olan SharedKey-yin olub olmadigini yoxluyurug;
+            string unFormattedKey = (await _userManager.GetAuthenticatorKeyAsync(currentUser!))!;
 
-            return View(new TwoFactorAuthViewModel() { TwoFactorType = (TwoFactor)currentUser!.TwoFactor!});
+            if (string.IsNullOrEmpty(unFormattedKey))
+            {
+                //Bu method yeni bidene key yaradir eger key varsa bele yenisin yaradir
+                await _userManager.ResetAuthenticatorKeyAsync(currentUser!);
+                unFormattedKey = (await _userManager.GetAuthenticatorKeyAsync(currentUser!))!;
+            }
+
+            TwoFactorAuthViewModel twoFactorAuthViewModel = new TwoFactorAuthViewModel();
+
+            twoFactorAuthViewModel.SharedKey = unFormattedKey;
+            twoFactorAuthViewModel.AuthenticatorUri = _twoFactorService.GenerateQrCodeUri(currentUser!.Email!, unFormattedKey);
+
+            return View(twoFactorAuthViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TwoFactorWithAuthenticator(TwoFactorAuthViewModel request)
+        {
+            var currentUser = _userManager.FindByNameAsync(User!.Identity!.Name!).Result;
+
+            var verificationCode = request.VerificationCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+            //Istifadecinin girdiyi dogrulama kodunun yoxlanilmasi
+            var isTwoTokenValid = await _userManager.VerifyTwoFactorTokenAsync(currentUser!, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+
+            if (!isTwoTokenValid)
+            {
+                ModelState.AddModelError(string.Empty, "Girdiginiz dogrulama kodu yanlisdir");
+                return View(request);
+            }
+
+            currentUser!.TwoFactorEnabled = true;
+            currentUser!.TwoFactor = (sbyte)TwoFactor.MicrosoftGoogle;
+
+            // istifadeci ucun qurtarma kodu yaradir.ikinci parametirde reqemi nece versey o qeder qurtarma kodu yaradir.
+            var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(currentUser!, 5);
+
+            TempData["recoverCodes"] = recoveryCodes;
+            TempData["message"] = "Iki adimli dogrulama tipiniz olarak Microsoft/Google Authenticator olarak belirlenmistir";
+
+            return RedirectToAction("TwoFactorAuth");
+        }
+
+        public IActionResult TwoFactorAuth()
+        {
+            var currentUser = _userManager.FindByNameAsync(User!.Identity!.Name!).Result;
+            return View(new TwoFactorAuthViewModel() { TwoFactorType = (TwoFactor)currentUser!.TwoFactor! });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TwoFactorAuth(TwoFactorAuthViewModel request)
+        {
+            var currentUser = _userManager.FindByNameAsync(User!.Identity!.Name!).Result;
+            switch (request.TwoFactorType)
+            {
+                case TwoFactor.None:
+                    currentUser!.TwoFactorEnabled = false;
+                    currentUser!.TwoFactor = (sbyte)TwoFactor.None;
+
+                    TempData["message"] = "Iki adimli kimlik dogrulama tipiniz hic biri olarak guncellenmisdir";
+                    break;
+
+                case TwoFactor.MicrosoftGoogle:
+                    return RedirectToAction("TwoFactorWithAuthenticator");
+
+            }
+
+            await _userManager.UpdateAsync(currentUser!);
+            return View(request);
         }
     }
 }
