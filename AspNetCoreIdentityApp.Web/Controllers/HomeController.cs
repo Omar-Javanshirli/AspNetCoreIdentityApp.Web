@@ -77,6 +77,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             // eger bu method ugurlu basa catsa bizim ucun bir cookie yaradacaq;
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
+            if (signInResult.RequiresTwoFactor)
+                return RedirectToAction("TwoFactorLogin");
+
             if (signInResult.IsLockedOut)
             {
                 ModelState.AddModelErrorList(new List<string>() { "3 dakika boyunca giriş yapamazsınız." });
