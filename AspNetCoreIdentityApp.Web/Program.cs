@@ -127,6 +127,15 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 var app = builder.Build();
 
+//Section Middleware.
+//Istifadeciye Email ve ya ssms yoluynan mesaj gonderdiyimiz zaman 120 saniyaliy bir omnru olacax mesajin.
+//Buna gore de kodu gonderdiyim annan nece deyqe kecdiyini sessionnan elde edecem. buna gore Session Middleware yazmax lazimdi
+builder.Services.AddSession(opt =>
+{
+    opt.IdleTimeout=TimeSpan.FromMinutes(30);
+    opt.Cookie.Name = "MainSession";
+});
+
 //Yalniz bir defe isdiyicey
 using (var scope = app.Services.CreateScope())
 {
@@ -154,6 +163,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseSession();
 
 app.MapControllerRoute(
     name: "areas",
