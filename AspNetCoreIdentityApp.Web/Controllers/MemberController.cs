@@ -1,6 +1,6 @@
 ﻿using AspNetCoreIdentityApp.Web.Extenisons;
 using AspNetCoreIdentityApp.Web.Models;
-using AspNetCoreIdentityApp.Web.Services.TwoFactorService;
+using AspNetCoreIdentityApp.Web.Services.TwoFactorServices;
 using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -291,12 +291,17 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 case TwoFactor.None:
                     currentUser!.TwoFactorEnabled = false;
                     currentUser!.TwoFactor = (sbyte)TwoFactor.None;
-
                     TempData["message"] = "Iki adimli kimlik dogrulama tipiniz hic biri olarak guncellenmisdir";
                     break;
 
                 case TwoFactor.MicrosoftGoogle:
                     return RedirectToAction("TwoFactorWithAuthenticator");
+
+                case TwoFactor.Email:
+                    currentUser!.TwoFactorEnabled = true;
+                    currentUser.TwoFactor = (SByte)TwoFactor.Email;
+                    TempData["message"] = "Iki Addimli dogrulama tipiniz email olarak belirlenmistir";
+                    break;
 
             }
 
