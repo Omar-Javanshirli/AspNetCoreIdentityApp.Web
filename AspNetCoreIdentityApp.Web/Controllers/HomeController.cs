@@ -9,6 +9,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using AspNetCoreIdentityApp.Web.Services.TwoFactorServices;
 using System.Runtime.InteropServices;
+using Azure.Core;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -20,9 +21,10 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         private readonly IEmailService _emailService;
         private readonly TwoFactorService _twoFactorService;
         private readonly EmailSender _emailSender;
+        private readonly SmsSender _smsSender;
 
         public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-            IEmailService emailService, TwoFactorService twoFactorService, EmailSender emailSender)
+            IEmailService emailService, TwoFactorService twoFactorService, EmailSender emailSender, SmsSender smsSender)
         {
             _logger = logger;
             _UserManager = userManager;
@@ -30,6 +32,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             _emailService = emailService;
             _twoFactorService = twoFactorService;
             _emailSender = emailSender;
+            _smsSender = smsSender;
         }
 
         public IActionResult Index()
@@ -82,6 +85,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             //}
 
             // eger bu method ugurlu basa catsa bizim ucun bir cookie yaradacaq;
+            await _signInManager.SignOutAsync();
+            await _signInManager.SignInAsync(hasUser,model.RememberMe);
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
             if (hasUser.TwoFactor == (int)TwoFactor.Email || hasUser.TwoFactor == (int)TwoFactor.Phone)
@@ -123,10 +128,16 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             switch ((TwoFactor)user!.TwoFactor!)
             {
-                case TwoFactor.None:
-                    break;
+               
                 case TwoFactor.Phone:
+
+                    if (_twoFactorService.TimeLeft(HttpContext) == 0)
+                        return RedirectToAction("SignIn");
+
+                    ViewBag.timeLeft = _twoFactorService.TimeLeft(HttpContext);
+                    HttpContext.Session.SetString("codeverification", _smsSender.Send(user.PhoneNumber!));
                     break;
+
                 case TwoFactor.Email:
 
                     if (_twoFactorService.TimeLeft(HttpContext) == 0)
@@ -136,12 +147,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
                     //4 reqemli kodu emaila gonderib hemcinin hemen kodu sessionda saxlayiriq.
                     HttpContext.Session.SetString("codeverification", _emailSender.Send(user.Email!));
+                    break;
 
-                    break;
-                case TwoFactor.MicrosoftGoogle:
-                    break;
-                default:
-                    break;
             }
 
             return View(new TwoFactorLoginViewModel() { TwoFactorType = (TwoFactor)user.TwoFactor });

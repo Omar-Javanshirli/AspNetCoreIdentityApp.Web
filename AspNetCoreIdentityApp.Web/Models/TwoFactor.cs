@@ -8,8 +8,8 @@ namespace AspNetCoreIdentityApp.Web.Models
         None = 0,
 
         [Display(Name = "Telefon ile kimlik dogrulama")]
-
         Phone = 1,
+
         [Display(Name = "Email ile kimlik dogrulama")]
         Email = 2,
 

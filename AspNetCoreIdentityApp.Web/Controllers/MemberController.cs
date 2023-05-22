@@ -299,8 +299,18 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
                 case TwoFactor.Email:
                     currentUser!.TwoFactorEnabled = true;
-                    currentUser.TwoFactor = (SByte)TwoFactor.Email;
+                    currentUser!.TwoFactor = (sbyte)TwoFactor.Email;
                     TempData["message"] = "Iki Addimli dogrulama tipiniz email olarak belirlenmistir";
+                    break;
+
+                case TwoFactor.Phone:
+
+                    if (string.IsNullOrEmpty(currentUser!.PhoneNumber))
+                        ViewBag.warning = "Telefon numaraniz belirtilmemisdir lutfen kullanici guncelleme sayfasinda telefon numaranizi belirtiniz";
+
+                    currentUser!.TwoFactorEnabled = true;
+                    currentUser!.TwoFactor= (sbyte)TwoFactor.Phone;
+                    TempData["message"] = "Iki Addimli dogrulama tipiniz Phone olarak belirlenmistir";
                     break;
 
             }
