@@ -235,8 +235,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             if (string.IsNullOrEmpty(unFormattedKey))
             {
-                //Bu method yeni bidene key yaradir eger key varsa bele yenisin yaradir
+                //Bu method hazir olan keyi sifirliyir
                 await _userManager.ResetAuthenticatorKeyAsync(currentUser!);
+                //Bu method yeni bidene key yaradir eger key varsa bele yenisin yaradir
                 unFormattedKey = (await _userManager.GetAuthenticatorKeyAsync(currentUser!))!;
             }
 
@@ -301,6 +302,12 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                     currentUser!.TwoFactorEnabled = true;
                     currentUser!.TwoFactor = (sbyte)TwoFactor.Email;
                     TempData["message"] = "Iki Addimli dogrulama tipiniz email olarak belirlenmistir";
+
+                    //mutleq sekilde yazilmalidir.Cunki UserTokens cedvelinde istifadeci ucun dogrulama kodu yaradilir.
+                    //eger ki bu kod yaradilmasa sign in zamani two factor authentication dogru islemeycey.
+                    //yani sizi bir basa ana seyfeye yonlendirecek. bunun bas vermemeyi ucun mutleq sekilde istifadeci ucun
+                    //dogrulama kodu databasaya yazilmalidir.
+                    await _userManager.GetAuthenticatorKeyAsync(currentUser!);
                     break;
 
                 case TwoFactor.Phone:
@@ -309,8 +316,11 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                         ViewBag.warning = "Telefon numaraniz belirtilmemisdir lutfen kullanici guncelleme sayfasinda telefon numaranizi belirtiniz";
 
                     currentUser!.TwoFactorEnabled = true;
-                    currentUser!.TwoFactor= (sbyte)TwoFactor.Phone;
+                    currentUser!.TwoFactor = (sbyte)TwoFactor.Phone;
                     TempData["message"] = "Iki Addimli dogrulama tipiniz Phone olarak belirlenmistir";
+
+                    //mutleq sekilde yazilmalidir.
+                    await _userManager.GetAuthenticatorKeyAsync(currentUser!);
                     break;
 
             }

@@ -83,7 +83,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             //    ModelState.AddModelError(string.Empty, "Email veya şifre yanlış");
             //    return View();
             //}
-
+    
             // eger bu method ugurlu basa catsa bizim ucun bir cookie yaradacaq;
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
@@ -91,7 +91,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 HttpContext.Session.Remove("currentTime");
 
             if (signInResult.RequiresTwoFactor)
-                return RedirectToAction("TwoFactorLogin", "Home", new { returnUrl = TempData!["ReturnUrl"]!.ToString() });
+                return RedirectToAction("TwoFactorLogin");
 
             if (signInResult.IsLockedOut)
             {
@@ -124,7 +124,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             switch ((TwoFactor)user!.TwoFactor!)
             {
-               
                 case TwoFactor.Phone:
 
                     if (_twoFactorService.TimeLeft(HttpContext) == 0)
@@ -144,7 +143,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                     //4 reqemli kodu emaila gonderib hemcinin hemen kodu sessionda saxlayiriq.
                     HttpContext.Session.SetString("codeverification", _emailSender.Send(user.Email!));
                     break;
-
             }
 
             return View(new TwoFactorLoginViewModel() { TwoFactorType = (TwoFactor)user.TwoFactor });
@@ -394,7 +392,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return Json(false);
             }
         }
-
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

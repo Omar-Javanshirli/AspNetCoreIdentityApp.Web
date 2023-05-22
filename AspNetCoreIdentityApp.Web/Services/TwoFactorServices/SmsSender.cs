@@ -19,7 +19,7 @@ namespace AspNetCoreIdentityApp.Web.Services.TwoFactorServices
 
             //sms provider codlanmasinin edeceyimiz yer buradi
 
-            return code;
+            return "2222";
         }
     }
 }
