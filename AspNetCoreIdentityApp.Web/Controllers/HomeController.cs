@@ -85,14 +85,10 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             //}
 
             // eger bu method ugurlu basa catsa bizim ucun bir cookie yaradacaq;
-            await _signInManager.SignOutAsync();
-            await _signInManager.SignInAsync(hasUser,model.RememberMe);
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
             if (hasUser.TwoFactor == (int)TwoFactor.Email || hasUser.TwoFactor == (int)TwoFactor.Phone)
-            {
                 HttpContext.Session.Remove("currentTime");
-            }
 
             if (signInResult.RequiresTwoFactor)
                 return RedirectToAction("TwoFactorLogin", "Home", new { returnUrl = TempData!["ReturnUrl"]!.ToString() });
