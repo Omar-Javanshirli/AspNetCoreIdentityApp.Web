@@ -8,6 +8,29 @@
 
     <script type="text/javascript">
 
+        //ajax sorgu
+        $("#sendEmail").click(() => {
+
+            $.ajax({
+                type: "GET",
+                contentType: "application/json,charset=utf-8",
+                url: "./AgainSendEmail",
+                dataType: "json",
+                success: function (resoponse) {
+                    if (resoponse == true) {
+                        alert("Dogruluma kodu tekrar email adresinize gonderilmistir");
+                    }
+                    else {
+                        alert("bir hata meydana geldi");
+                    }
+                },
+                error: function () {
+                    alert("bir hata meydana geldi");
+                }
+            })
+
+        });
+
         $(document).ready(() => {
             var timeLeft = parseInt("@ViewBag.timeLeft");
 
@@ -59,20 +82,24 @@
                 </div>
             }
 
-
             <div class="form-group">
                 <input type="submit" class="btn btn-success" value="Gonder" />
+
+                @if (Model.TwoFactorType == TwoFactor.Email)
+                {
+                    <input class="btn btn-primary" type="button" value="Tekrar email gonder" id="sendEmail" />
+                }
             </div>
         </form>
 
-        
-            @if (Model.TwoFactorType == TwoFactor.Email || Model.TwoFactorType == TwoFactor.Phone)
-            {
-                <div class="alert alert-primary">
-                    <span class="text-primary" id="minutes"></span> dakika
-                    <span class="text-primary" id="second"></span> kaldi
-                </div>
-            }
+
+        @if (Model.TwoFactorType == TwoFactor.Email || Model.TwoFactorType == TwoFactor.Phone)
+        {
+            <div class="alert alert-primary">
+                <span class="text-primary" id="minutes"></span> dakika
+                <span class="text-primary" id="second"></span> kaldi
+            </div>
+        }
 
         <div class="alert alert-info">
             @switch (Model.TwoFactorType)

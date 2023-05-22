@@ -8,6 +8,7 @@ using AspNetCoreIdentityApp.Web.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using AspNetCoreIdentityApp.Web.Services.TwoFactorServices;
+using System.Runtime.InteropServices;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -89,7 +90,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
 
             if (signInResult.RequiresTwoFactor)
-                return RedirectToAction("TwoFactorLogin");
+                return RedirectToAction("TwoFactorLogin", "Home", new { returnUrl = TempData!["ReturnUrl"]!.ToString() });
 
             if (signInResult.IsLockedOut)
             {
@@ -168,6 +169,21 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                     isSuccessAuth = true;
                 else
                     ModelState.AddModelError(string.Empty, "Dogrulama kodu yanlis");
+            }
+
+            if (user.TwoFactor == (sbyte)TwoFactor.Email || user.TwoFactor == (sbyte)TwoFactor.Phone)
+            {
+                ViewBag.timeLeft = _twoFactorService.TimeLeft(HttpContext);
+                if (request.VerificationCode == HttpContext.Session.GetString("codeverification"))
+                {
+                    await _signInManager.SignOutAsync();
+                    await _signInManager.SignInAsync(user, request.IsRememberMe);
+                    HttpContext.Session.Remove("currentTime");
+                    HttpContext.Session.Remove("codeverification");
+                    isSuccessAuth = true;
+                }
+                else
+                    ModelState.AddModelError(string.Empty, "dogrulama kodu yanlisdir");
             }
 
             if (isSuccessAuth == true)
@@ -357,6 +373,23 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 ModelState.AddModelError(string.Empty, "Email or password is incorrect.");
 
             return RedirectToAction("Error");
+        }
+
+        [HttpGet]
+        public JsonResult AgainSendEmail()
+        {
+            try
+            {
+                var user = _signInManager.GetTwoFactorAuthenticationUserAsync().Result;
+                HttpContext.Session.SetString("codeVerification", _emailSender.Send(user!.Email!));
+                return Json(true);
+            }
+            catch (Exception)
+            {
+                //loglama yap;
+                //istifadeciye xeta melumati goster;
+                return Json(false);
+            }
         }
 
         public IActionResult Error()
