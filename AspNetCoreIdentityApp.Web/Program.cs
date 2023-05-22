@@ -45,6 +45,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequirementHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, ViolenceRequirementHandler>();
+builder.Services.AddScoped<EmailSender>();
 
 //Two factor service
 builder.Services.Configure<TwoFactorOptions>(builder.Configuration.GetSection("TwoFactorOptions"));
@@ -125,22 +126,22 @@ builder.Services.ConfigureApplicationCookie(opt =>
     opt.SlidingExpiration = true;
 });
 
-var app = builder.Build();
-
 //Section Middleware.
 //Istifadeciye Email ve ya ssms yoluynan mesaj gonderdiyimiz zaman 120 saniyaliy bir omnru olacax mesajin.
 //Buna gore de kodu gonderdiyim annan nece deyqe kecdiyini sessionnan elde edecem. buna gore Session Middleware yazmax lazimdi
 builder.Services.AddSession(opt =>
 {
-    opt.IdleTimeout=TimeSpan.FromMinutes(30);
+    opt.IdleTimeout = TimeSpan.FromMinutes(30);
     opt.Cookie.Name = "MainSession";
 });
+
+var app = builder.Build();
+
 
 //Yalniz bir defe isdiyicey
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
-
     await PermissionSeed.Seed(roleManager);
 }
 

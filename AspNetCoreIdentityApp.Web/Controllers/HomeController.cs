@@ -7,6 +7,7 @@ using AspNetCoreIdentityApp.Web.Extenisons;
 using AspNetCoreIdentityApp.Web.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using AspNetCoreIdentityApp.Web.Services.TwoFactorServices;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -16,13 +17,18 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         private readonly UserManager<AppUser> _UserManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailService _emailService;
+        private readonly TwoFactorService _twoFactorService;
+        private readonly EmailSender _emailSender;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
+            IEmailService emailService, TwoFactorService twoFactorService, EmailSender emailSender)
         {
             _logger = logger;
             _UserManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
+            _twoFactorService = twoFactorService;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -77,6 +83,11 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             // eger bu method ugurlu basa catsa bizim ucun bir cookie yaradacaq;
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
+            if (hasUser.TwoFactor == (int)TwoFactor.Email || hasUser.TwoFactor == (int)TwoFactor.Phone)
+            {
+                HttpContext.Session.Remove("currentTime");
+            }
+
             if (signInResult.RequiresTwoFactor)
                 return RedirectToAction("TwoFactorLogin");
 
@@ -99,7 +110,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
 
             return Redirect(returnUrl!);
-
         }
 
         public async Task<IActionResult> TwoFactorLogin(string ReturnUrl = "/")
@@ -117,6 +127,15 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 case TwoFactor.Phone:
                     break;
                 case TwoFactor.Email:
+
+                    if (_twoFactorService.TimeLeft(HttpContext) == 0)
+                        return RedirectToAction("SignIn");
+
+                    ViewBag.timeLeft = _twoFactorService.TimeLeft(HttpContext);
+
+                    //4 reqemli kodu emaila gonderib hemcinin hemen kodu sessionda saxlayiriq.
+                    HttpContext.Session.SetString("codeverification", _emailSender.Send(user.Email!));
+
                     break;
                 case TwoFactor.MicrosoftGoogle:
                     break;
