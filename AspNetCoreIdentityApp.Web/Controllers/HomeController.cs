@@ -232,8 +232,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             //login provderKey => daxil oldugu mes(facebook, twitter) ve.s ordaki user idsidir.
             ExternalLoginInfo info = (await _signInManager.GetExternalLoginInfoAsync())!;
 
-            if (info == null)
-                return RedirectToAction("login");
+            // if (info == null)
+            //     return RedirectToAction("login");
 
             Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, true);
 

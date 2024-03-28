@@ -90,7 +90,7 @@ builder.Services.AddAuthorization(options =>
 
 //thirt party Authentication for facebook
 builder.Services.AddAuthentication()
-    .AddFacebook(options =>
+    .AddFacebook(options => 
     {
         options.AppId = builder!.Configuration["Authentication:Facebook:AppId"]!;
         options.AppSecret = builder!.Configuration["Authentication:Facebook:AppSecret"]!;
